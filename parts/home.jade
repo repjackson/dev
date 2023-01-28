@@ -1,0 +1,247 @@
+template(name='home')
+    .ui.header home
+    // if currentUser.admin_mode
+    //     img.ui.fluid.image.home_banner(src="{{c.url 'gratigenlayout'}}" class=darkmode_class)
+    // .ui.stackable.padded.celled.grid
+    //     .three.wide.column.scrolling
+    //         // .bordered(class=left_column_class)
+    //         // unless session_is 'expand_leftbar' true
+    //         // +dash_user_info
+    //         // +user_impact_graph
+    //         // +facet key='essential'
+    //         // +essential_facet
+    //     .eight.wide.column.scrolling        
+    //         .ui.one.column.grid     
+    //             .centered.column.scrolling
+    //                 // +facet key='model' icon='database'
+    //                 // .ui.icon.input
+    //                 // +model_facet
+    //                 div
+    //                 .ui.inline.search
+    //                     .ui.large.icon.input.search_bar
+    //                         input.prompt(type='text' placeholder='search')
+    //                         i.search.icon
+    //                 div
+    //                 // +tag_facet
+    //                 // +facet key='tag' icon='tag'
+    //                 // +home_cloud
+    //             // +thing_picker_template
+    //                 .ui.inline.search
+    //                     .ui.large.icon.input.search_bar
+    //                         input.prompt(type='text' placeholder='add/request/search...')
+    //                         i.search.icon
+    //                 // each homepage_models
+    //                 //     +filter_model
+    //             .centered   
+    //                         // .results    
+    //                 each model_docs_helper 'view_mode'
+    //                     +session_set key='view_mode' value=title title=title icon=icon color=icon_color
+    //                 // +session_toggle key='show_map' icon='map'
+    //                 // +session_toggle key='show_calendar' icon='calendar'
+    //                 each model_docs_helper 'sort_key'
+    //                     +profile_key_value_edit key='sort_key' value=title label=title icon=icon color=icon_color
+    //                 .ui.inline.header sort
+    //                 // +profile_key_value_edit key='sort_direction' value=1 icon='sort-up'
+    //                 // +profile_key_value_edit key='sort_direction' value=-1 icon='sort-down'
+    //                 // .ui.inline.header limit
+    //                 // +profile_key_value_edit key='limit' value=1 label=1
+    //                 // +profile_key_value_edit key='limit' value=10 label=10
+    //                 // +profile_key_value_edit key='limit' value=25 label=25
+    //                 // +profile_key_value_edit key='limit' value=50 label=50
+    //             if session_is 'view_mode' 'list'
+    //                 .ui.items 
+    //                     each doc_results 
+    //                         .item
+    //                             .content
+    //                                 .header #{title}
+    //                                 |mini_card
+                                    
+    //             else if session_is 'view_mode' 'cards'
+    //                 .ui.stackable.cards.scrolling
+    //                         each doc_results
+    //                             +home_card
+    //             else
+    //                 .ui.eight.wide.column.centered
+    //                     .ui.centered.cards.one.scrolling
+    //                         each doc_results
+    //                             +delta_result_card
+        // .five.wide.scrolling.column
+            // +my_things
+            // +mapbox
+            // +calendar
+            // +user_connection_graph
+        
+            // +online_users
+            // // +chart
+            // +my_things
+            // // if session_is 'show_map' true
+            // // +mapbox
+            // // if session_is 'show_calendar' true 
+            // +calendar_view
+            // +online_allies
+        // +thing_maker
+        // if current_thing.
+        //     if _is 'model'_edit
+        // [current_thing_type]_edit
+        //     +thing_picker
+        //      +eft_picker
+    // .ui.modal 
+    //     with current_viewing_thing
+    //         .header #{title}
+    //         i.close.large.icon
+    //         .scrolling.content
+    //             if session_is 'editmode' true
+    //                 +Template.dynamic template=edit_template
+    //             else 
+    //                 +Template.dynamic template=view_template
+    //         .content 
+    //             a.ui.big.circular.icon.button(href='/m/#{model}/{_id}')
+    //                 i.chevron.right.icon   
+    //             .ui.button.button.toggle_editmode
+    //                 i.large.pencil.icon
+
+template(name='my_things')
+    .ui.segment
+        |my_things
+        div
+        |eft_categories x gratigen_thing_type x mainpage_search_bar x datetime_range x selected_map_area x my_things
+        //(displays small cards of dashboard search parameters)
+        div
+        +home_card
+        //should be small_card
+
+// //template(name='small_card')
+//         // thing_type_icon, thing_name, 
+//             thing_short_info 
+//                 (pending action alert and; 
+//                 countdown for events and tasks, number of pending tasks for role, resource in use or not, 
+//                 Project progress percentage, my held value in org, like count for posts, offer accepted or not, 
+//                 request granted or not, skills you have that are being sought,
+//                 Badges you have or almost qualify for that are being sought)
+
+
+//template(name='thing_maker_modal')  
+
+template(name='dash_user_info')
+    with currentUser
+        .ui.two.column.grid
+            .six.wide.column
+                img.ui.circular.medium.image(src="{{c.url image_id width=120 height=120 gravity='face' crop='fill'}}") 
+            .ten.wide.column
+                .ui.header.printme
+                    |#{username}
+                    div
+                    |#{tagline}
+                
+                
+template(name='user_impact_graph')
+    .ui.segment
+        .ui.header user impact graph
+        img.ui.image(src="/d3_sunburst.jpg")
+        
+        
+        
+template(name='user_connection_graph')
+    .ui.segment
+        .ui.header user connection graph
+        img.ui.image(src="/network_graph.png")
+
+
+
+
+template(name='home_card')
+    .ui.link.card
+        // if youtube_id 
+        //     +youtube_view key='youtube_id' direct=true
+        .content.fly_out.zoomer
+            a.inline.header
+                with parent_model
+                    span(title=title)
+                        +i name=icon color=stripped_icon_color
+                |#{title} 
+            
+            img.ui.image(src="{{c.url image_id width=400 height=400}}")
+        if card_template_exists
+            +Template.dynamic template=model_card_template
+
+        .content 
+            .description
+                |!{body}
+                // .ui.header lat: #{lat}
+                // .ui.header lng: #{lng}
+                //     // i.newspaper.large.icon
+                +creation_info
+                if location 
+                    .ui.label.basic
+                        i.marker.icon
+                        |#{location}
+                .ui.image.large.basic.label
+                    img.ui.image(src="{{c.url _author.image_id width=400 height=400}}")
+                    // i.user.icon
+                    |#{_author_username}
+                // if tags 
+                //     each seven_tags 
+                //         .ui.basic.label #{this}
+                +voting
+                // +eft_view_item_small
+                //like/dislike, comment, share(sms,email,dm), comments (expand)    
+
+
+
+
+
+template(name='thing_picker_template')
+    .column.bordered
+        .ui.top.attached.tabular.menu  
+            a.center.item.toggle_addmode.zoomer(data-tab='add' title='add thing')
+                +i name='play-button-circled--v1' color='40C057'
+            // .active.item(data-tab='viewing')
+            //     |viewing
+        .ui.bottom.attached.tab.segment.centered.ani(data-tab='add')
+    //         //select type of thing you're creating >> open thing type editor modal
+    //         if session_is 'addmode' true
+    //                each model_docs_helper
+    //             +thing_picker model='post' icon='for-you' color='1255B8'
+    //             //blue
+    //             +thing_picker model='offer' icon='hand-holding-heart' color='FF73EA'
+    //             //pink
+    //             +thing_picker model='request' icon='commercial' color='40C057'     
+    //             //green
+                
+    //             div
+    //             +thing_picker model='org' icon='groups' color='83DFF4' 
+    //             //light blue
+    //             +thing_picker model='project' icon='project' color='7229AF' 
+    //             //violet
+    //             +thing_picker model='event' icon='calendar' color='FAB005'
+    //             //yellow
+    //             +thing_picker model='role' icon='what-i-do' color='42E8C4'
+    //             //turquoise
+    //             +thing_picker model='tasks' icon='task' color='B785E1'
+    //             //lavender
+    //             +thing_picker model='resource' icon='field-and-tractor' color='FD7E14'
+    //             +thing_picker model='skills' icon='wrench' color='ff0000'
+    //             //red
+    //             +thing_picker model='badges' icon='badge' color='1255B8'
+    //             //blue
+    //             div
+    //             +thing_picker model='datetime' icon='overtime--v1' color='FD7E14'
+    //             +thing_picker model='location' icon='worldwide-location' color='40C057'
+    //             +thing_picker model='accounts' icon='gold-bars' color='FAB005'
+    //                 //people
+    //             .ui.divider
+        div
+                +online_users
+         //side scrolling users' avatars (pulls  up profile in modal) - new, nearby, recommended - 
+            //.ui.fluid.big.menu.hscroll
+            +
+            //+new_nearby_allied_users
+
+
+
+template(name='search')
+    .ui.padded.grid 
+        .sixteen.wide.column
+            .ui.header 
+                i.search.icon
+                |searching #{current_delta._search}

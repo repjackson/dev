@@ -1,0 +1,26 @@
+template(name='calendar_view')    
+    // .ui.header 
+    //     // i.calendar.icon
+    //     |calendar 
+    
+    #inline_calendar 
+        
+      
+      
+    
+template(name='side_menu_item')
+    a.ui.header.item.toggle_item.invert(style="color:#{icon_color}" class=side_item_class)
+        // i.icon.tiny(class=icon)
+        +i name=icon color=icon_color
+        if session_is 'expand_leftbar' true
+            |#{title}
+        // if is_toggled
+        //     i.large.checkmark.icon
+
+           
+           
+template(name='filter_model')
+    .ui.circular.secondary.basic.button.pick_model.zoomer(style="border-color:##{stripped_icon_color}" class=button_class color=stripped_icon_color)
+        +ismall name=icon color=stripped_icon_color cl='ui image'
+        // i.exchange.large.icon
+        span.invert(style="color:##{stripped_icon_color}") #{title}

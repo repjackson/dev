@@ -1,0 +1,101 @@
+template(name='model_doc_view')
+    with current_doc
+        .ui.stackable.padded.grid
+            .row
+                .four.wide.column.scrolling
+                    with current_model
+                        a.ui.circular.basic.large.button.goto_model
+                            // i.chevron.left.icon
+                            // i.big.icon(class=_model.icon)
+                            +i name=icon color=stripped_icon_color
+                            |#{title}
+                        // if can_edit
+                    with cd 
+                        +boolean_edit key='edit_mode' direct=true 
+                    div
+                    a.ui.header.zoomer.call_alpha.pointer(title='recalc')
+                        i.cubes.icon
+                        |fields
+                    if cd.edit_mode
+                        +array_edit key='_keys' direct=true
+                        +field_edit
+                    else 
+                        .smallscroll
+                            +array_view key='_keys' direct=true
+                    if is_admin
+                        .ui.header 
+                            i.clock.icon
+                            |timestamp tags
+                        each _timestamp_tags
+                            .ui.inverted.label #{this}
+                    +user_list_toggle key='bookmark_ids' icon='bookmark' label='bookmark'
+                    div
+                    .ui.small.header #{views} views
+                    .ui.small.inline.header by
+                    each viewer_usernames
+                        .ui.small.label #{this}
+                    .ui.button.fly_out
+                        i.bars.icon
+                        |fly out
+                        
+                    
+                    +author_info
+                    +creation_info
+                    //- +points_transaction
+                    +voting_full
+                    +print_this
+                    .smallscroll
+                        if tags
+                            +array_view key='tags' label='tags' direct=true
+                    +comments
+                    +viewing
+                .twelve.wide.column
+                    if cd.edit_mode 
+                        .ui.massive.header 
+                            i.pencil.icon
+                            |editing mode
+                    if title
+                        .ui.header #{title}
+                    if image_id 
+                        +image_view key='image_id'
+                    // if description
+                    |!{description}
+                    |!{body}
+                    .ui.two.column.stackable.grid.scrolling
+                        each _keys
+                            .column
+                                +found_field
+                    // .ui.header
+                        // each fields
+                            // if header
+                            // .ui.header #{key} type: #{field_type}
+                            // +Template.dynamic template=view_template 
+                        // if icon
+                        //     i.icon(class=icon)
+                        // |#{title}
+                    // each fields
+                    //     // unless header
+                    //     .item
+                    //         +Template.dynamic template=view_template 
+                    // each _model.actions
+                    //     +Template.dynamic template=this data=current_doc
+
+                    //- +comments
+                    //- div
+                    //- if watson
+                    //-     +watson
+
+template(name='found_field')
+    // +Template.dynamic template=this data=current_doc
+    if current_delta.edit_mode
+        +print_this
+        // .ui.input 
+        //     input(type='number')
+        //     label ranking
+        .ui.icon.button.rank_up
+            i.chevron.up.icon
+        .ui.icon.button.rank_down
+            i.chevron.up.icon
+    if field_temp_exists
+        // +print_this
+        +Template.dynamic template=this data=current_doc

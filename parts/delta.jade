@@ -1,0 +1,607 @@
+template(name='delta')
+    if cd.edit_mode
+        .ui.blue.segment
+            +model_edit
+    // if currentUser.admin_mode
+        // +grid_layout
+
+    // else 
+    .ui.stackable.padded.grid
+        // if currentUser.admin_mode
+        //     unless current_delta 
+        //         .ui.button.create_delta
+        //             |+ delta
+            // unless _model
+            //     .ui.button.create_model
+            //         |+ model
+                
+        with current_model
+            // unless _model.show_facets
+            // .middle.aligned.row
+            //     .sixteen.wide.column
+            //         +model_top
+            // .ui.header #{column_count},#{row_count}
+            //      +block_#{block_id}
+            // The equal width variation will automatically divide column width evenly. This is useful with dynamic content where you do not know the column count in advance.
+            if currentUser.admin_mode
+                .row
+                    each widget_docs
+                        div(class=column_class)
+                            .ui.header i'm a column #{column_width} wide
+            .row
+                // if _model.show_facets
+                //     .four.wide.colum
+                //         each sorted_facets
+                //             +facet
+                // div(class=result_column_class)
+                .ui.sixteen.wide.column
+                    if model_template
+                        +Template.dynamic template=model_template
+                    // unless _model.show_facets
+                    +model_top
+                    
+                    if _model.show_filter_bar
+                        |&nbsp;
+                        .ui.icon.input(class=query_class)
+                            if current_delta.search_query
+                                i.link.remove.large.icon.clear_query
+                            else
+                                i.search.icon
+                            input#search(type='text' autocomplete="off" value=current_delta.search_query)
+            .row
+                .three.wide.column   
+                    unless single_doc
+                        // - .ui.segment(class=loading_class)
+                        span.ui.inline.small.grey.header(title='change sort direction')
+                            |sort
+                        // if sortable_fields.count
+                        .ui.simple.large.dropdown(title='sort by')
+                            strong #{current_delta.sort_key}
+                            i.dropdown.icon
+                            .menu
+                                each sortable_fields
+                                    .item.set_sort_key 
+                                        if icon 
+                                            +i name=icon
+                                        |#{title}
+                        .ui.tertiary.icon.button.set_sort_direction(title='sort direction')
+                            if sorting_up
+                                i.sort.amount.down.large.icon
+                            else
+                                i.sort.amount.up.large.icon
+                        //- .ui.compact.button.set_sort_direction
+                        //-     |#{current_delta.sort_direction}
+                        // |&nbsp;
+                        // |&nbsp;
+                        // // .ui.inline.small.grey.header
+                        //     |viewing
+                        // .ui.simple.dropdown(title='visible fields')
+                        //     | fields
+                        //     i.dropdown.icon
+                        //     .menu
+                        //         each model_fields
+                        //             +toggle_visible_field
+                        // |&nbsp;
+                        // |&nbsp;
+                        // |&nbsp;
+                    
+                        .ui.simple.dropdown(title='result limit')
+                            .text.large #{current_delta.limit}
+                            i.dropdown.icon
+                            .vertical.menu
+                                +set_limit amount=1
+                                +set_limit amount=5
+                                +set_limit amount=10
+                                +set_limit amount=20
+                                +set_limit amount=50
+                        |&nbsp;
+                        |&nbsp;
+                        |&nbsp;
+                        |of 
+                        span.ui.small.inline.header(title='total results') #{current_delta.total}
+                        |&nbsp;
+                        |&nbsp;
+                        with current_delta
+                            +key_value_edit key='view_mode' value='list' icon='list' hide_label=true
+                            +key_value_edit key='view_mode' value='cards' icon='grid' hide_label=true
+                        // +set_view_mode title='list' icon='list'
+                        // +set_view_mode title='cards' icon='clone'
+                        // .ui.inline.small.grey.header view
+                        // .ui.simple.dropdown.item
+                        //     |#{current_delta.view_mode}
+                        //     i.dropdown.icon
+                        //     .menu
+                        //         //+set_view_mode title='table' icon='table'
+                        //         +set_view_mode title='items' icon='list'
+                        //         +set_view_mode title='map' icon='map'
+                        //         +set_view_mode title='graph' icon='graph'
+                        // .ui.compact.small.icon.button.toggle_right_panel
+                        //     i.table.large.icon
+                        // .spacer
+                    .ui.button.subscribe
+                        |subscribe
+                    +voting_full
+                    +print_this
+                    .ui.small.header ranking: #{ranking}
+                .thirteen.wide.column.scrolling
+                    //- each current_delta.result_ids
+                    //-     .ui.header #{this}
+                    // if delta_key_value_is 'view_mode' 'cards'
+                    unless delta_key_value_is 'view_mode' 'list'
+                        .ui.stackable.cards
+                            if is_loading
+                                each current_delta.result_ids
+                                    .ui.card
+                                        .ui.placeholder
+                                            .rectangular.image
+                                        .content
+                                            .ui.fluid.placeholder
+                                                .header
+                                                    .line
+                                                .line
+                                                .line
+                                                .line
+                                                .line
+                            else
+                                each current_delta.result_ids
+                                    +delta_result_card
+                    if delta_key_value_is 'view_mode' 'list'
+                        //- .ui.segments
+                        each current_delta.result_ids
+                            if is_loading
+                                .ui.basic.segment
+                                    .ui.fluid.placeholder
+                                        .line
+                                        .line
+                                        .line
+                                        .line
+                            else 
+                                +delta_list_result
+                                // .ui.divider
+                // - +Template.dynamic template=view_mode_template
+            .row 
+                .sixteen.wide.column
+                    if model_stats_exists
+                        +Template.dynamic template=model_stats
+        unless _model
+            if subs_ready
+                if currentUser.admin_mode
+                    .ui.big.button.create_model 
+                        i.plus.icon
+                        |create model
+                //- else 
+                    //- .ui.header model not found
+            //- else
+            .ui.basic.center.aligned.segment
+                .ui.header
+                    i.big.loading.grey.asterisk.circular.colored.blue.icon.invert
+    // +grid_layout
+            
+template(name='grid_layout')
+    .ui.celled.centered.grid
+        .three.column.row
+            .centered.column
+                .ui.centred.button button
+            .column.centered
+                .ui.celled.centered.grid
+                    .three.column.row
+                        .column.centered
+                            .ui.fluid.button button
+                        .column.centered
+                            .ui.fluid.button button
+                        .column.centered
+                            .ui.fluid.button button
+            .column.centered
+                .ui.centred.button button
+        
+        .two.columnd.row
+            .column.centered
+                .ui.top.attached.tabular.menu
+                    .active.item view
+                    .center.item edit
+                    .item permissions
+                .ui.bottom.attached.active.tab.segment
+                    .ui.segment Here is the display of the page you're building!
+                .ui.bottom.attached.tab.segment
+                    |b
+                .ui.bottom.attached.tab.segment
+                    |c
+        .one.column.row 
+            // input plain language commands
+            .ui.celled.grid
+                .two.column.row.celled
+                    .column
+                        |fields
+                    .column
+                        |blocks
+                .three.column.row.celled
+                    .column
+                        |a
+                    .column
+                        |b
+                    .column
+                        .ui.celled.grid
+                            .two.column.row.celled
+                                .column
+                                    |c
+                                .column
+                                    |d
+        .one.column.row
+            .column.centered
+                .centered
+                    |models
+
+    
+            
+            
+template(name='model_top')
+    unless key_value_is current_delta._model 'model'
+        if currentUser
+            a.ui.icon.basic.compact.circular.button.go_home.zoomer
+                i.big.home.icon
+    a.ui.header.reset.inline(title="#{description}, #{views} views")
+        if is_loading
+            i.loading.grey.asterisk.circular.colored.blue.icon.invert
+        else
+            with current_model
+                if icon
+                    +ibig name=icon color=stripped_icon_color
+                if total_count
+                    small(title='total children count')
+                        |#{total_count}
+                | #{title}
+                if unread_count
+                    small(title='total unread count')
+                        |(#{_model.total_count})
+            
+    // i.plus.large.green.circular.link.icon.add_model_doc(title="add #{slug}")
+    unless is_loading
+        if currentUser
+            // unless key_value_is current_delta.model_filter 'model'
+            //     unless key_value_is _model.collection 'user'
+            // if is_admin
+            // else 
+            //     if currentUser
+            .ui.icon.basic.circular.button.add_model_doc.zoomer(title="add #{slug}")
+                i.plus.large.green.icon.invert
+            if can_edit
+                i.cog.large.circular.link.icon.edit_model.zoomer(title='edit model')
+    //     //- +user_list_toggle key='bookmark_ids' add_icon='bookmark outline' remove_icon='bookmark' label="bookmark"
+    if current_delta
+        // if is_admin
+        if currentUser
+            if currentUser.admin_mode
+                i.code.link.icon.print_delta(title='print session doc')
+            i.refresh.link.reset.grey.circular.large.icon.zoomer(title='reload session')
+            // i.trash.delete_delta.link.icon(title='delete session')
+    else
+        .create_delta.ui.big.green.circular.button(title='new session')
+            i.plus.icon
+            |create session
+            
+template(name='toggle_visible_field')            
+    .item.toggle_visibility
+        if field_visible
+            i.green.checkmark.icon
+        | #{title}
+    
+//- template(name='delta_table')
+//-     .ui.table
+//-         thead
+//-             each fields
+//-                 th #{title}
+//-         tbody
+//-             each current_delta.result_ids
+//-                 tr
+//-                     each fields
+//-                         td
+//-                             |#{field_value}   
+//- 
+                 
+template(name='delta_result_card')
+    with result
+        .ui.card(class=loading_class tabindex="1")
+            .content
+                // unless key_value_is 'model' 'model'
+                //     i.grey.database.icon(title='delta')
+                span.right.floated
+                    |#{when}
+                    with parent_model
+                        +ismall name=icon color=stripped_icon_color 
+                    // div
+                    // +creation_info
+                if key_value_is 'model' 'model'
+                    a.ui.header.goto_doc
+                        // i.icon(class=icon)
+                        small(title='total count') #{total_count}
+                        +i name=icon color=stripped_icon_color 
+                        |#{title}
+                else
+                    if icon 
+                        +i name=icon color=icon_color
+                    img.ui.avatar.image(src="{{c.url _author.image_id}}" title=_author.username)
+                    |#{_author.username}
+                    div
+                    if title 
+                        a.ui.inline.header.goto_doc
+                            // .ui.grid
+                            |#{title}
+            if image_id
+                img.ui.fluid.image.goto_doc.zoomer.pointer(src="{{c.url image_id width=500 height=500}}")
+            .content          
+
+                each fields
+                    +Template.dynamic template=view_template
+                if key_value_is 'model' 'model'
+                    //- +user_list_toggle key='bookmark_ids' icon='bookmark' label='bookmark' color='red'
+                    //- a.ui.button.route_model(href="/m/#{slug}")
+                    //-     |view model
+                    //-     i.right.chevron.green.icon
+                        //- +i name='chevron-right' clases='ui avatar image'
+                    if currentUser.admin_mode
+                        a.ui.circular.icon.button.edit_this(title='edit model')
+                            i.cog.icon
+                            // |edit model
+                        // span(title='views')
+                        //     i.grey.eye.icon
+                        //     | #{views}
+                        // .ui.teal.label 
+                        //     |#{app}
+                else
+                    if can_edit
+                        a.ui.icon.button.edit_this
+                            i.pencil.large.icon
+                            //- |edit
+                //- a.ui.icon.large.button(href="/m/#{_model.slug}/#{_id}/view" title='view')
+            //-     i.right.chevron.yellow.large.icon
+            // if is_admin
+            .content
+                .right.floated
+                    | #{views} views
+                // if _author_id
+                //     +author_info
+                +voting
+                    //- i.eye.icon
+                //     each viewer_usernames
+                //         .ui.small.inverted.label #{this}
+                // //- +comments
+                +eft_viewer
+                if currentUser.admin_mode
+                    +print_this
+                    +remove_button
+                each tags 
+                    .ui.small.label #{this}
+            if template_exists
+                +Template.dynamic template=model_template
+            .content
+                +comments
+
+template(name='comments')
+    details.ui.fluid.accordion
+        summary.title.zoomer
+            .ui.dividing.header
+                i.chat.outline.icon
+                |#{doc_comments.count} comments
+        .content
+            if currentUser
+                .ui.fluid.icon.large.input
+                    input.add_comment(model='text' placeholder='add')
+            .ui.comments
+                each doc_comments
+                    .comment
+                        a.avatar   
+                            img.ui.avatar.image(src="{{c.url _author.image_id width=300 height=300 gravity='face' crop='fill'}}")
+                        .content
+                            a.author(href="/user/#{_author.username}") #{_author.name}
+                            .metadata
+                                span.date #{when}
+                                // |by 
+                                // a(href="/user/#{_author.username}") #{_author.name}
+                            .text !{body}
+                            .actions
+                                a.reply reply
+                                i.thumbs.up.icon
+                                i.smile.icon
+                                
+                                // if currentUser
+                                //     +voting_small
+                                //     if can_edit
+                                //         +remove_button
+                            
+template(name='delta_list')
+    each current_delta.result_ids
+        //- .column
+        +delta_list_result
+                        
+template(name='set_limit')
+    // .item.set_limit #{amount}
+    .ui.compact.basic.button.set
+        |#{amount}
+
+template(name='set_view_mode')
+    a.ui.tertiary.icon.button.set_view_mode(title=title)
+        i.large.icon(class=icon)
+        //- if icon 
+        //- |#{title}
+
+        
+template(name='toggle_delta_config')
+    if boolean_true
+        .ui.active.icon.button.disable_key(title=label)
+            // | #{label}
+    else
+        .ui.icon.button.enable_key(title=label)
+            // | #{label}
+            
+            
+
+
+            
+template(name='points_transaction')
+    .ui.header my points #{currentUser.points}
+    .ui.header offer points
+    .ui.input
+        input.offer_points_amount(type='number')
+    .ui.button.offer_points
+        i.right.chevron.icon
+    each offers
+        +offer
+        
+        
+template(name='offer')
+    .ui.small.inline.header amount #{amount}
+    +author_info
+
+
+//- template(name='view_model')
+        
+template(name='field_view')
+    +text_view key='title'                    
+    +text_view key='key'                    
+    +text_view key='field_type'                    
+    +number_view key='rank' label='rank'                  
+
+
+
+template(name='model_view')
+    with current_doc
+        .ui.stackable.padded.grid
+            .row
+                .sixteen.wide.column
+                    .ui.breadcrumb
+                        a.section(href="/m/#{_model}" title=_model)
+                            .ui.compact.button
+                                |#{_model.title}
+                        .divider
+                            i.chevron.right.icon
+                        .active.section
+                            if icon
+                                i.icon(class=icon)
+                            if title
+                                |#{title}
+                            else
+                                | view #{model}
+            .row
+                .four.wide.column
+                    // .ui.header
+                    //     a.ui.icon.button(href="/m/#{model}" title=plural)
+                    //         i.chevron.left.icon
+                    //     |View #{model}
+                    if can_edit
+                        a.ui.fluid.button(href="/m/#{model}/#{_id}/edit")
+                            i.pencil.icon
+                            |edit
+                    each model.actions
+                        +Template.dynamic template=this data=current_doc
+                    +user_list_toggle key='bookmark_ids' icon='bookmark' label='Bookmark' color='red'
+                    +creation_info
+                .twelve.wide.column
+                    .ui.header
+                        each fields
+                            if header
+                                +Template.dynamic template=view_template 
+                        // if icon
+                        //     i.icon(class=icon)
+                        // |#{title}
+                    each fields
+                        unless header
+                            .item
+                                +Template.dynamic template=view_template 
+                    div
+                    +comments
+        .ui.stackable.padded.grid
+            .four.wide.column
+                h1.ui.header #{title}
+                .ui.icon.big.button.add_child(title="add #{slug}")
+                    i.plus.icon
+                a.ui.icon.big.button(href="/model/edit/#{_id}")
+                    i.pencil.icon
+                .ui.form
+                    +text_view key='title'
+                    +text_view key='slug'
+                    +text_view key='icon'
+                    +textarea_view key='description'
+                    +array_view key='tags'
+                //- +cloud filter=slug
+            .twelve.wide.column
+                //- .ui.header Fields
+                //- each fields
+                //-     .ui.divider
+                //-     +field_view
+                each model_docs
+                    .ui.fluid.card
+                        .content
+                            +Template.dynamic template=model_doc
+                            +array_view key='tags'
+                            +edit_button
+
+
+template(name='delta_list_result')
+    with result
+        if template_exists
+            +Template.dynamic template=model_template
+            // .ui.header temp found
+        else
+            .ui.fluid.basic.segment.result_segment
+                .content
+                    if key_value_is 'model' 'model'
+                        a.ui.inline.header.route_model.zoomer(href="/m/#{slug}")
+                            // i.icon(class=icon)
+                            +i name=icon color=icon_color
+                            |#{title}
+                    else
+                        a.ui.inline.header.route_model.zoomer(href="/m/#{slug}/#{_id}")
+                            +i name=icon color=icon_color
+                            // i.icon(class=icon)
+                            |#{title}
+                        //- each visible_fields
+                        each fields
+                            +Template.dynamic template=view_template
+                    span.extra
+                        if key_value_is 'model' 'model'
+                            //- +user_list_toggle key='bookmark_ids' icon='bookmark' label='bookmark' color='red'
+                            if currentUser.admin_mode
+                                a.ui.compact.basic.button.route_model.zoomer(href="/model/edit/#{_id}")
+                                    i.cog.icon
+                                    |edit model
+                                span(title='views')
+                                    i.grey.eye.icon
+                                    | #{views}
+                        else
+                            .ui.compact.large.circular.basic.button.result.zoomer
+                                i.right.chevron.large.icon
+                            if can_edit
+                                a.ui.icon.button(href="/m/#{_model.slug}/#{_id}/edit" title='edit')
+                                    i.pencil.large.icon
+                                    //- |edit
+                            //- a.ui.icon.large.button(href="/m/#{_model.slug}/#{_id}/view" title='view')
+                            //-     i.right.chevron.yellow.large.icon
+                            if _author_id
+                                +author_info
+                            +creation_info
+                            .ui.small.inline.header #{views} views
+                                //- i.eye.icon
+                                each viewer_usernames
+                                    .ui.small.inverted.label #{this}
+                        if currentUser.admin_mode
+                            +print_this
+                            +creation_info
+                            +remove_button
+                        //- +comments
+
+template(name='delta_result_table_row')
+    tr.pointer.goto_doc
+        //- if result.color_icon
+        //-     +i name=result.color_icon
+        //- td
+            //- |#{result.title}
+        each visible_fields
+            +dr_table_cell
+
+template(name='dr_table_cell')
+    td
+        if is_loading
+            .ui.fluid.placeholder
+                .line
+        else
+            | #{result_value}
